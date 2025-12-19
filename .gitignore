@@ -1,0 +1,52 @@
+## Ignore Visual Studio temporary files, build results, and user-specific files
+
+# Build directories
+bin/
+obj/
+out/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+.vspscc
+
+# Publish output
+publish/
+publish_debug/
+
+# Generated files
+*.g.cs
+*.GenerateAssemblyInfo.cs
+
+# Runtime files (usually in bin/) - ignored via bin/ but include common patterns
+*.deps.json
+*.runtimeconfig.json
+
+# Logs
+*.log
+
+# OS generated files
+Thumbs.db
+.DS_Store
+
+# Other
+*.vsix
+*.ncrunch*
