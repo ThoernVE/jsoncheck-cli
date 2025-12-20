@@ -9,11 +9,6 @@ namespace JsonCheck.Utils
     }
     public sealed class ClipboardReader : IClipboardReader
     {
-        public string ReadText()
-        {
-            var text = ClipboardService.GetText() ?? throw new EmptyStringException("No text found in clipboard");
-            return text;
-        }
-
+        public string? ReadText() => ClipboardService.GetText();
     }
 }
