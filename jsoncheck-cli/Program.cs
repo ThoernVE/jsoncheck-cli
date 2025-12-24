@@ -1,32 +1,55 @@
-﻿using System;
-using System.Threading;
+﻿using System.CommandLine;
 using JsonCheck.Services;
 using JsonCheck.Utils;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using System.Dynamic;
+
 
 internal class Program
 {
-    [STAThread]
-    static void Main(string[] args)
+    static async Task<int> Main(string[] args)
     {
-        var clipboardReader = new ClipboardReader();
-        var clipboardText = clipboardReader.ReadText();
-
-        if (string.IsNullOrWhiteSpace(clipboardText))
+        var clipboardOption = new Option<bool>("--clipboard", aliases: new string[] { "-c" })
         {
-            Console.WriteLine("Clipboard Empty");
-            Environment.Exit(1);
-        }
+            Description = "Read JSON from the clipboard"
+        };
 
-        var jsonValidator = new JsonValidator();
-        var result = jsonValidator.Validate(clipboardText);
+        var rootCommand = new RootCommand("Validate JSON input");
+        rootCommand.Options.Add(clipboardOption);
+
+        rootCommand.SetAction(parseResult =>
+        {
+            var context = new InputContext
+            {
+                UseClipBoard = parseResult.GetValue(clipboardOption),
+                HasStdin = Console.IsInputRedirected,
+                //TODO add filepath
+            };
+
+            var input = InputSelector.GetInput(context, out int exitCode);
+            if (input is null)
+                return exitCode;
+
+            return ValidateAndReport(input);
+        });
+
+        ParseResult parseResult = rootCommand.Parse(args);
+        return await parseResult.InvokeAsync();
+    }
+
+    private static int ValidateAndReport(string input)
+    {
+        var validator = new JsonValidator();
+        var result = validator.Validate(input);
 
         if (result.IsValid)
         {
-            Console.WriteLine("JSON is valid");
-            Environment.Exit(0);
+            Console.WriteLine("Json is valid");
+            return 0;
         }
 
-        Console.WriteLine("JSON is invalid");
+        Console.WriteLine("JSON is invalid:");
 
         if (result.ErrorMessage is not null)
             Console.WriteLine($"Error : {result.ErrorMessage}");
@@ -35,7 +58,18 @@ internal class Program
             Console.WriteLine($"Path : {result.Path}");
 
         if (result.LineNumber is not null)
-            Console.WriteLine($"Line : {result.LineNumber}:{result.LinePosition}");
-        Environment.Exit(1);
+            Console.WriteLine($"Line : {result.LineNumber}");
+
+        if (result.LinePosition is not null)
+            Console.WriteLine($"Lineposition : {result.LinePosition}");
+
+        return 1;
     }
+}
+
+internal sealed class InputContext
+{
+    public bool UseClipBoard { get; init; }
+    public string? FilePath { get; init; }
+    public bool HasStdin { get; init; }
 }
