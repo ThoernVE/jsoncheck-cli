@@ -1,9 +1,6 @@
 ﻿using System.CommandLine;
 using JsonCheck.Services;
-using JsonCheck.Utils;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using System.Dynamic;
+using Spectre.Console;
 
 
 internal class Program
@@ -15,11 +12,20 @@ internal class Program
             Description = "Read JSON from the clipboard"
         };
 
+        var noColorOption = new Option<bool>("--no-color")
+        {
+            Description = "Disable colored output"
+        };
+
         var rootCommand = new RootCommand("Validate JSON input");
         rootCommand.Options.Add(clipboardOption);
+        rootCommand.Options.Add(noColorOption);
 
         rootCommand.SetAction(parseResult =>
         {
+            if (parseResult.GetValue(noColorOption))
+                DisableColorOutput();
+
             var context = new InputContext
             {
                 UseClipBoard = parseResult.GetValue(clipboardOption),
@@ -45,40 +51,46 @@ internal class Program
 
         if (result.IsValid)
         {
-            Console.WriteLine("Json is valid");
+            AnsiConsole.MarkupLine("[green]Json is valid[/]");
             return 0;
         }
 
-        Console.WriteLine("JSON is invalid:");
+        AnsiConsole.MarkupLine("[bold red]JSON is invalid:[/]");
 
         switch (result.ErrorKind)
         {
             case JsonErrorKind.NotJson:
-                Console.WriteLine("Input does not seem to be valid JSON, please check the input");
-                Console.WriteLine("Input did not start with '{' or '['");
+                AnsiConsole.MarkupLine("[red]Input does not seem to be valid JSON, please check the input[/]");
+                AnsiConsole.MarkupLine(Markup.Escape("Input did not start with '{' or '['"));
                 break;
             case JsonErrorKind.SyntaxError:
-                Console.WriteLine("JSON Syntax error");
-                Console.WriteLine($"Error: {result.ErrorMessage}");
+                AnsiConsole.MarkupLine("[red]JSON syntax error[/]");
+                AnsiConsole.MarkupLine($"[yellow]Message:[/] {result.ErrorMessage}");
 
                 if (result.LineNumber is not null)
-                    Console.WriteLine($"Location: line {result.LineNumber}, column {result.LinePosition}");
+                    AnsiConsole.MarkupLine($"[yellow]Location: line {result.LineNumber}, column {result.LinePosition}[/]");
 
                 if (result.Path is not null)
-                    Console.WriteLine($"Path: {result.Path}");
+                    AnsiConsole.MarkupLine($"[yellow]Path: {result.Path}[/]");
                 break;
 
             case JsonErrorKind.EmptyInput:
-                Console.WriteLine("Input is empty");
+                AnsiConsole.MarkupLine("[yellow]Input is empty[/]");
                 break;
 
             default:
-                Console.WriteLine("Unknown error");
-                Console.WriteLine($"Message: {result.ErrorMessage}");
+                AnsiConsole.MarkupLine("[red]Unknown error[/]");
+                AnsiConsole.MarkupLine($"[yellow]Message:[/] {result.ErrorMessage}");
                 break;
         }
 
         return 1;
+    }
+
+    private static void DisableColorOutput()
+    {
+        AnsiConsole.Profile.Capabilities.Ansi = false;
+        AnsiConsole.Profile.Capabilities.ColorSystem = ColorSystem.NoColors;
     }
 }
 

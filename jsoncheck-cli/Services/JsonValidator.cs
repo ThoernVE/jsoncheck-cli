@@ -36,7 +36,7 @@ public sealed class JsonValidator : IJsonValidator
             return new JsonValidationResult
             {
                 IsValid = false,
-                ErrorKind = IsLikelyJson(json) ? JsonErrorKind.NotJson : JsonErrorKind.SyntaxError,
+                ErrorKind = IsLikelyJson(json) ? JsonErrorKind.SyntaxError : JsonErrorKind.NotJson,
                 ErrorMessage = ex.Message,
                 Path = ex.Path,
                 LineNumber = ex.LineNumber,
