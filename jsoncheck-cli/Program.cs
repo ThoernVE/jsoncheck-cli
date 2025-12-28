@@ -51,17 +51,32 @@ internal class Program
 
         Console.WriteLine("JSON is invalid:");
 
-        if (result.ErrorMessage is not null)
-            Console.WriteLine($"Error : {result.ErrorMessage}");
+        switch (result.ErrorKind)
+        {
+            case JsonErrorKind.NotJson:
+                Console.WriteLine("Input does not seem to be valid JSON, please check the input");
+                Console.WriteLine("Input did not start with '{' or '['");
+                break;
+            case JsonErrorKind.SyntaxError:
+                Console.WriteLine("JSON Syntax error");
+                Console.WriteLine($"Error: {result.ErrorMessage}");
 
-        if (result.Path is not null)
-            Console.WriteLine($"Path : {result.Path}");
+                if (result.LineNumber is not null)
+                    Console.WriteLine($"Location: line {result.LineNumber}, column {result.LinePosition}");
 
-        if (result.LineNumber is not null)
-            Console.WriteLine($"Line : {result.LineNumber}");
+                if (result.Path is not null)
+                    Console.WriteLine($"Path: {result.Path}");
+                break;
 
-        if (result.LinePosition is not null)
-            Console.WriteLine($"Lineposition : {result.LinePosition}");
+            case JsonErrorKind.EmptyInput:
+                Console.WriteLine("Input is empty");
+                break;
+
+            default:
+                Console.WriteLine("Unknown error");
+                Console.WriteLine($"Message: {result.ErrorMessage}");
+                break;
+        }
 
         return 1;
     }
