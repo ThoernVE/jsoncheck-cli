@@ -17,9 +17,15 @@ internal class Program
             Description = "Disable colored output"
         };
 
+        var fileOption = new Option<string>("--file", aliases: new string[] { "-f" })
+        {
+            Description = "Read JSON from a file"
+        };
+
         var rootCommand = new RootCommand("Validate JSON input");
         rootCommand.Options.Add(clipboardOption);
         rootCommand.Options.Add(noColorOption);
+        rootCommand.Options.Add(fileOption);
 
         rootCommand.SetAction(parseResult =>
         {
@@ -29,6 +35,7 @@ internal class Program
             var context = new InputContext
             {
                 UseClipBoard = parseResult.GetValue(clipboardOption),
+                FilePath = parseResult.GetValue(fileOption),
                 HasStdin = Console.IsInputRedirected,
                 //TODO add filepath
             };

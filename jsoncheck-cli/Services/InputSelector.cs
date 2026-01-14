@@ -10,11 +10,22 @@ internal static class InputSelector
     {
         exitCode = 0;
 
+        int sourcesUsed = (context.UseClipBoard ? 1 : 0) + (!String.IsNullOrWhiteSpace(context.FilePath) ? 1 : 0) + (context.HasStdin ? 1 : 0);
+
+        if (sourcesUsed == 0)
+            return Fail("No input source specified. Use -c/--clipboard, -f/--file <path> or pipe input via stdin.", out exitCode);
+
+        if (sourcesUsed > 1)
+            return Fail("Multiple input sources specified. Please choose only one of: -c/--clipboard, -f/--file <path> or pipe input via stdin.", out exitCode);
+
         if (context.UseClipBoard)
             return ReadClipboard(out exitCode);
 
         if (context.HasStdin)
             return ReadStdin(out exitCode);
+
+        if (!string.IsNullOrWhiteSpace(context.FilePath))
+            return ReadFile(context.FilePath!, out exitCode);
 
         return Fail("No input source specified", out exitCode);
     }
@@ -52,11 +63,26 @@ internal static class InputSelector
         return stdinText;
     }
 
-    private static string? ReadFile(out int exitCode)
+    private static string? ReadFile(string path, out int exitCode)
     {
         exitCode = 0;
 
-        return "Todo: implement FileReading"; //Todo
+        try
+        {
+            if (!File.Exists(path))
+                return Fail($"File not found: {path}", out exitCode);
+
+            var text = File.ReadAllText(path);
+
+            if (string.IsNullOrWhiteSpace(text))
+                return Fail($"File is empty: {path}", out exitCode);
+
+            return text;
+        }
+        catch (Exception ex)
+        {
+            return Fail($"Failed to read file '{path}': {ex.Message}", out exitCode);
+        }
     }
 
     private static string? Fail(string message, out int exitCode)
