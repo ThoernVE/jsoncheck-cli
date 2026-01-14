@@ -1,6 +1,9 @@
-﻿using System.CommandLine;
+﻿using System.Runtime.CompilerServices;
+using System.CommandLine;
 using JsonCheck.Services;
 using Spectre.Console;
+
+[assembly: InternalsVisibleTo("jsoncheck.tests")]
 
 
 internal class Program
