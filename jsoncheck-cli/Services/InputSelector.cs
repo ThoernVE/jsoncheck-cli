@@ -1,14 +1,16 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Net.Mail;
-using System.Reflection.Metadata.Ecma335;
 using JsonCheck.Utils;
 
 internal static class InputSelector
 {
-    public static string? GetInput(InputContext context, out int exitCode)
+    public static string? GetInput(InputContext context, out int exitCode, IClipboardReader? clipboard = null,
+        IFileReader? fileReader = null,
+        IStdinReader? stdinReader = null)
     {
         exitCode = 0;
+
+        clipboard ??= new ClipboardReader();
+        fileReader ??= new FileReader();
+        stdinReader ??= new StdinReader();
 
         int sourcesUsed = (context.UseClipBoard ? 1 : 0) + (!String.IsNullOrWhiteSpace(context.FilePath) ? 1 : 0) + (context.HasStdin ? 1 : 0);
 
@@ -19,60 +21,49 @@ internal static class InputSelector
             return Fail("Multiple input sources specified. Please choose only one of: -c/--clipboard, -f/--file <path> or pipe input via stdin.", out exitCode);
 
         if (context.UseClipBoard)
-            return ReadClipboard(out exitCode);
-
-        if (context.HasStdin)
-            return ReadStdin(out exitCode);
+            return ReadClipboard(clipboard, out exitCode);
 
         if (!string.IsNullOrWhiteSpace(context.FilePath))
-            return ReadFile(context.FilePath!, out exitCode);
+            return ReadFile(context.FilePath!, fileReader, out exitCode);
+
+        if (context.HasStdin)
+            return ReadStdin(stdinReader, out exitCode);
 
         return Fail("No input source specified", out exitCode);
     }
 
-    private static InputSource ResolveSource(ParseResult parseResult, Option<bool> clipboardOption)
-    {
-        if (parseResult.GetValue(clipboardOption))
-            return InputSource.Clipboard;
-
-        if (Console.IsInputRedirected)
-            return InputSource.Stdin;
-
-        return InputSource.None;
-    }
-
-    private static string? ReadClipboard(out int exitCode)
+    private static string? ReadClipboard(IClipboardReader clipboardReader, out int exitCode)
     {
         exitCode = 0;
 
-        var clipboardText = new ClipboardReader().ReadText();
+        var clipboardText = clipboardReader.ReadText();
         if (string.IsNullOrWhiteSpace(clipboardText))
-            return Fail("Clipboard is empty", out exitCode);
+            return Fail("Clipboard is empty.", out exitCode);
 
         return clipboardText;
     }
 
-    private static string? ReadStdin(out int exitCode)
+    private static string? ReadStdin(IStdinReader stdin, out int exitCode)
     {
         exitCode = 0;
 
-        var stdinText = Console.In.ReadToEnd();
+        var stdinText = stdin.ReadStdin();
         if (string.IsNullOrWhiteSpace(stdinText))
-            return Fail("Stdin input ios empty", out exitCode);
+            return Fail("Stdin input is empty.", out exitCode);
 
         return stdinText;
     }
 
-    private static string? ReadFile(string path, out int exitCode)
+    private static string? ReadFile(string path, IFileReader fileReader, out int exitCode)
     {
         exitCode = 0;
 
         try
         {
-            if (!File.Exists(path))
+            if (!fileReader.Exists(path))
                 return Fail($"File not found: {path}", out exitCode);
 
-            var text = File.ReadAllText(path);
+            var text = fileReader.ReadAllText(path);
 
             if (string.IsNullOrWhiteSpace(text))
                 return Fail($"File is empty: {path}", out exitCode);
