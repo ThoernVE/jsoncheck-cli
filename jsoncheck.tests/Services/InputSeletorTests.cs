@@ -11,7 +11,7 @@ public class InputSelectorTests
         {
             UseClipBoard = false,
             FilePath = null,
-            HasStdin = false
+            UseStdin = false
         };
 
         var result = InputSelector.GetInput(ctx, out var exitCode,
@@ -33,7 +33,7 @@ public class InputSelectorTests
         {
             UseClipBoard = true,
             FilePath = "a.json",
-            HasStdin = false
+            UseStdin = false
         };
 
         var result = InputSelector.GetInput(ctx, out var exitCode,
@@ -55,7 +55,7 @@ public class InputSelectorTests
         {
             UseClipBoard = true,
             FilePath = null,
-            HasStdin = false
+            UseStdin = false
         };
 
         var clipboard = new MockClipboardReader { Value = "{\"a\":1}" };
@@ -79,7 +79,7 @@ public class InputSelectorTests
         {
             UseClipBoard = true,
             FilePath = null,
-            HasStdin = false
+            UseStdin = false
         };
 
         var clipboard = new MockClipboardReader { Value = "   " };
@@ -106,7 +106,7 @@ public class InputSelectorTests
         {
             UseClipBoard = false,
             FilePath = "test.json",
-            HasStdin = false
+            UseStdin = false
         };
 
         var result = InputSelector.GetInput(ctx, out var exitCode,
@@ -128,7 +128,7 @@ public class InputSelectorTests
         {
             UseClipBoard = false,
             FilePath = "missing.json",
-            HasStdin = false
+            UseStdin = false
         };
 
         var result = InputSelector.GetInput(ctx, out var exitCode,
@@ -153,7 +153,7 @@ public class InputSelectorTests
         {
             UseClipBoard = false,
             FilePath = "empty.json",
-            HasStdin = false
+            UseStdin = false
         };
 
         var result = InputSelector.GetInput(ctx, out var exitCode,
@@ -179,7 +179,7 @@ public class InputSelectorTests
         {
             UseClipBoard = false,
             FilePath = "boom.json",
-            HasStdin = false
+            UseStdin = false
         };
 
         var result = InputSelector.GetInput(ctx, out var exitCode,
@@ -201,7 +201,7 @@ public class InputSelectorTests
         {
             UseClipBoard = false,
             FilePath = null,
-            HasStdin = true
+            UseStdin = true
         };
 
         var stdin = new MockStdinReader { Value = "{\"stdin\":true}" };
@@ -225,7 +225,7 @@ public class InputSelectorTests
         {
             UseClipBoard = false,
             FilePath = null,
-            HasStdin = true
+            UseStdin = true
         };
 
         var stdin = new MockStdinReader { Value = " " };
