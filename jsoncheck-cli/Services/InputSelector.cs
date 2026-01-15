@@ -12,13 +12,13 @@ internal static class InputSelector
         fileReader ??= new FileReader();
         stdinReader ??= new StdinReader();
 
-        int sourcesUsed = (context.UseClipBoard ? 1 : 0) + (!String.IsNullOrWhiteSpace(context.FilePath) ? 1 : 0) + (context.HasStdin ? 1 : 0);
+        int sourcesUsed = (context.UseClipBoard ? 1 : 0) + (!String.IsNullOrWhiteSpace(context.FilePath) ? 1 : 0) + (context.UseStdin ? 1 : 0);
 
         if (sourcesUsed == 0)
-            return Fail("No input source specified. Use -c/--clipboard, -f/--file <path> or pipe input via stdin.", out exitCode);
+            return Fail("No input source specified. Use -c/--clipboard, -f/--file <path> or '-' for stdin.", out exitCode);
 
         if (sourcesUsed > 1)
-            return Fail("Multiple input sources specified. Please choose only one of: -c/--clipboard, -f/--file <path> or pipe input via stdin.", out exitCode);
+            return Fail("Multiple input sources specified. Please choose only one of: -c/--clipboard, -f/--file <path> or '-' for stdin.", out exitCode);
 
         if (context.UseClipBoard)
             return ReadClipboard(clipboard, out exitCode);
@@ -26,7 +26,7 @@ internal static class InputSelector
         if (!string.IsNullOrWhiteSpace(context.FilePath))
             return ReadFile(context.FilePath!, fileReader, out exitCode);
 
-        if (context.HasStdin)
+        if (context.UseStdin)
             return ReadStdin(stdinReader, out exitCode);
 
         return Fail("No input source specified", out exitCode);

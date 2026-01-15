@@ -25,10 +25,17 @@ internal class Program
             Description = "Read JSON from a file"
         };
 
+        var inputArgument = new Argument<string?>("input")
+        {
+            Description = "Use '-' to read JSON from stdin",
+            Arity = ArgumentArity.ZeroOrOne
+        };
+
         var rootCommand = new RootCommand("Validate JSON input");
         rootCommand.Options.Add(clipboardOption);
         rootCommand.Options.Add(noColorOption);
         rootCommand.Options.Add(fileOption);
+        rootCommand.Arguments.Add(inputArgument);
 
         rootCommand.SetAction(parseResult =>
         {
@@ -39,8 +46,7 @@ internal class Program
             {
                 UseClipBoard = parseResult.GetValue(clipboardOption),
                 FilePath = parseResult.GetValue(fileOption),
-                HasStdin = Console.IsInputRedirected,
-                //TODO add filepath
+                UseStdin = parseResult.GetValue(inputArgument) == "-",
             };
 
             var input = InputSelector.GetInput(context, out int exitCode);
@@ -108,5 +114,5 @@ internal sealed class InputContext
 {
     public bool UseClipBoard { get; init; }
     public string? FilePath { get; init; }
-    public bool HasStdin { get; init; }
+    public bool UseStdin { get; init; }
 }

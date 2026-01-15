@@ -8,11 +8,27 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>jsoncheck</ToolCommandName>
+
+    <PackageId>jsoncheck-cli</PackageId>
+    <Version>0.1.2</Version>
+    <Authors>ThoernVE</Authors>
+    <Description>Validate JSON from clipboard, file, or stdin.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/ThoernVE/jsoncheck-cli</RepositoryUrl>
+
+    <PackageOutputPath>.\nupkg</PackageOutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.1" />
     <PackageReference Include="TextCopy" Version="6.2.1" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
