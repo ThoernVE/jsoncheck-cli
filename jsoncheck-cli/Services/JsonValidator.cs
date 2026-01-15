@@ -1,5 +1,4 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace JsonCheck.Services;
 
@@ -24,23 +23,32 @@ public sealed class JsonValidator : IJsonValidator
 
         try
         {
-            JToken.Parse(json);
+            var options = new JsonDocumentOptions
+            {
+                AllowTrailingCommas = false,
+                CommentHandling = JsonCommentHandling.Disallow
+            };
+
+            using var _ = JsonDocument.Parse(json, options);
 
             return new JsonValidationResult
             {
                 IsValid = true
             };
         }
-        catch (JsonReaderException ex)
+        catch (JsonException ex)
         {
+            int? line = ex.LineNumber is long ln ? checked((int)ln + 1) : null;
+            int? col = ex.BytePositionInLine is long bp ? checked((int)bp + 1) : null;
+
             return new JsonValidationResult
             {
                 IsValid = false,
                 ErrorKind = IsLikelyJson(json) ? JsonErrorKind.SyntaxError : JsonErrorKind.NotJson,
                 ErrorMessage = ex.Message,
-                Path = ex.Path,
-                LineNumber = ex.LineNumber,
-                LinePosition = ex.LinePosition
+                Path = null,
+                LineNumber = line,
+                LinePosition = col
             };
         }
         catch (Exception ex)
