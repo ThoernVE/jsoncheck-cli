@@ -19,6 +19,7 @@
     <Description>Validate JSON from clipboard, file, or stdin.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/ThoernVE/jsoncheck-cli</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <PackageOutputPath>.\nupkg</PackageOutputPath>
   </PropertyGroup>
